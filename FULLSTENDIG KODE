@@ -3,6 +3,78 @@
 # A Maria
 
 # B & C Linnea
+# --------------------------------------------------
+# OPPGAVE B: Antall sommerdager, høysommerdager og tropedager per år
+# --------------------------------------------------
+
+def oppgave_b(data, stasjonsnavn="Oslo Blindern"):
+    år_data = defaultdict(lambda: {"sommer": 0, "høy": 0, "trope": 0})
+
+    for rad in data:
+        temp = rad["maks_temp"]
+        if temp is None:
+            continue
+
+        år = rad["dato"].year
+
+        if temp > 20:
+            år_data[år]["sommer"] += 1
+        if temp > 25:
+            år_data[år]["høy"] += 1
+        if temp > 30:
+            år_data[år]["trope"] += 1
+
+    årstall = sorted(år_data.keys())
+    sommer = [år_data[år]["sommer"] for år in årstall]
+    høy = [år_data[år]["høy"] for år in årstall]
+    trope = [år_data[år]["trope"] for år in årstall]
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(årstall, sommer, label="Sommerdager (>20°C)")
+    plt.plot(årstall, høy, label="Høysommerdager (>25°C)")
+    plt.plot(årstall, trope, label="Tropedager (>30°C)")
+
+    plt.xlabel("År")
+    plt.ylabel("Antall dager")
+    plt.title(f"Varme dager per år ({stasjonsnavn})")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+# --------------------------------------------------
+# OPPGAVE C: Temperatursammenlikning per år (minst 300 dager)
+# --------------------------------------------------
+
+def oppgave_c(datasett):
+    plt.figure(figsize=(12, 6))
+
+    for navn, data in datasett.items():
+        år_grupper = defaultdict(list)
+
+        for rad in data:
+            if rad["middeltemp"] is not None:
+                år_grupper[rad["dato"].year].append(rad["middeltemp"])
+
+        årstall = []
+        gjennomsnitt = []
+
+        for år in sorted(år_grupper):
+            # Krav: Minst 300 dager med data for det gitte året
+            if len(år_grupper[år]) >= 300:
+                årstall.append(år)
+                gjennomsnitt.append(
+                    sum(år_grupper[år]) / len(år_grupper[år])
+                )
+
+        plt.plot(årstall, gjennomsnitt, label=navn)
+
+    plt.title("Årlig gjennomsnittstemperatur for værstasjoner")
+    plt.xlabel("År")
+    plt.ylabel("Gjennomsnittstemperatur (°C)")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 # D & E Malin
 
