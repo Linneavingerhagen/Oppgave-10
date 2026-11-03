@@ -1,0 +1,55 @@
+--------------------------------------------------
+OPPGAVE A: Plotting og aggregering per måned
+--------------------------------------------------
+def oppgave_a(data):
+    grupper = defaultdict(list)
+
+    for rad in data:
+        nøkkel = (rad["dato"].year, rad["dato"].month)
+        grupper[nøkkel].append(rad)
+    
+    måneder = []
+    maks_sno = []
+    total_nedbor = []
+    maks_temp = []
+    min_temp = []
+    maks_vind = []
+
+    for nøkkel in sorted(grupper):
+        måned = grupper[nøkkel]
+        måneder.append(f"{nøkkel[0]}-{nøkkel[1]:02d}")
+
+        sno = [r["snodybde"] for r in måned if r["snodybde"] is not None]
+        nedbor = [r["nedbor"] for r in måned if r["nedbor"] is not None]
+        temp = [r["middeltemp"] for r in måned if r["middeltemp"] is not None]
+        vind = [r["vind"] for r in måned if r["vind"] is not None]
+
+        # Maks snødybde
+        maks_sno.append(max(sno) if sno else None)
+
+        # Total nedbør (krever mer enn 20 gyldige målinger)
+        if len(nedbor) > 20:
+            total_nedbor.append(sum(nedbor))
+        else:
+            total_nedbor.append(None)
+
+        # Maks og min middeltemperatur
+        maks_temp.append(max(temp) if temp else None)
+        min_temp.append(min(temp) if temp else None)
+
+        # Maks middelvind
+        maks_vind.append(max(vind) if vind else None)
+
+    plt.figure(figsize=(12, 8))
+    plt.plot(måneder, maks_sno, label="Maks snødybde (cm)")
+    plt.plot(måneder, total_nedbor, label="Total nedbør (mm)")
+    plt.plot(måneder, maks_temp, label="Maks middeltemp (°C)")
+    plt.plot(måneder, min_temp, label="Min middeltemp (°C)")
+    plt.plot(måneder, maks_vind, label="Maks middelvind (m/s)")
+
+    plt.title("Månedsstatistikk (Hele tidsserien)")
+    plt.xlabel("År-Måned")
+    plt.xticks(rotation=90)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
