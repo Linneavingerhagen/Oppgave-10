@@ -1,0 +1,94 @@
+# --------------------------------------------------
+# OPPGAVE D: Plotte vindstatistikk per måned (på tvers av år)
+# --------------------------------------------------
+
+def oppgave_d(data, stasjonsnavn="Sinnes"):
+    måneder = list(range(1, 13))
+    minimum = []
+    medianer = []
+    maksimum = []
+
+    for måned in måneder:
+        verdier = [
+            rad["vind"]
+            for rad in data
+            if rad["dato"].month == måned and rad["vind"] is not None
+        ]
+
+        if verdier:
+            minimum.append(min(verdier))
+            medianer.append(median(verdier))
+            maksimum.append(max(verdier))
+        else:
+            minimum.append(None)
+            medianer.append(None)
+            maksimum.append(None)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(måneder, minimum, label="Minimum vindstyrke")
+    plt.plot(måneder, medianer, label="Median vindstyrke")
+    plt.plot(måneder, maksimum, label="Maksimum vindstyrke")
+
+    plt.xlabel("Måned (1-12)")
+    plt.ylabel("Vindstyrke (m/s)")
+    plt.title(f"Vindstatistikk per måned ({stasjonsnavn})")
+    plt.xticks(måneder)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+# --------------------------------------------------
+# OPPGAVE E: Antall dager med skiføre per sesong
+# --------------------------------------------------
+
+def oppgave_e(datasett):
+    plt.figure(figsize=(12, 6))
+
+    for navn, data in datasett.items():
+        if not data:
+            continue
+
+        sesonger = {}
+        første_år = min(rad["dato"].year for rad in data)
+        siste_år = max(rad["dato"].year for rad in data)
+
+        for år in range(første_år + 1, siste_år + 1):
+            gyldige_dager = 0
+            skidager = 0
+
+            for rad in data:
+                dato = rad["dato"]
+                sno = rad["snodybde"]
+
+                # Skisesong: 1. nov (år-1) til 30. april (år)
+                gyldig_periode = (
+                    (dato.year == år - 1 and dato.month >= 11)
+                    or
+                    (dato.year == år and dato.month <= 4)
+                )
+
+                if gyldig_periode and sno is not None:
+                    gyldige_dager += 1
+                    # Skiføre regnes vanligvis som snødybde >= 20 cm (eller > 0 cm)
+                    if sno >= 20:
+                        skidager += 1
+
+            # Krav: Minst halvparten av dagene i skisesongen (~90 dager av ~181 dager)
+            if gyldige_dager >= 90:
+                sesonger[år] = skidager
+
+        if sesonger:
+            plt.plot(
+                list(sesonger.keys()),
+                list(sesonger.values()),
+                marker="o",
+                label=navn
+            )
+
+    plt.title("Antall dager med skiføre per sesong")
+    plt.xlabel("Sesong (sluttår)")
+    plt.ylabel("Antall dager med skiføre")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
